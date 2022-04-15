@@ -1,11 +1,10 @@
 import { notification } from "antd"
 
 export function showErrors (err) {
-	Array.isArray(err.message)
-		? err.message.forEach((msg) => {
-			notification.error({ description: msg })
-		})
-		: notification.error({ description: err.message })
+	console.log(err.data)
+	Object.keys(err.data).forEach((key) => {
+		notification.error({ description: err.data[key] })
+	})
 }
 
 export function showSuccess () {

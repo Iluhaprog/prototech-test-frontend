@@ -16,13 +16,19 @@ export function AuthForm ({
 	const onFinish = (values) => {
 		switch (type) {
 		case "sign-in":
-			signIn(values.username, values.password)
-				.then(data => setToken(data.access_token))
+			signIn(
+				values.email,
+				values.password,
+				data => {
+					console.log(data)
+					setToken(data.metadata.access_token)
+				}
+			)
 			break
 		case "sign-up":
-			signUp(values.username, values.password)
-				.then(() => {
-					setIsCreated(true)
+			signUp(values.name, values.email, values.password)
+				.then((res) => {
+					setIsCreated(res)
 				})
 			break
 		}
@@ -50,10 +56,21 @@ export function AuthForm ({
 				onFinishFailed={onFinishFailed}
 				autoComplete="off"
 			>
+				{
+					type === "sign-up"
+						? <Form.Item
+							label="Name"
+							name="name"
+							rules={[ { required: true, message: "Please input your name!" } ]}
+						>
+							<Input />
+						</Form.Item>
+						: <></>
+				}
 				<Form.Item
-					label="Username"
-					name="username"
-					rules={[ { required: true, message: "Please input your username!" } ]}
+					label="Email"
+					name="email"
+					rules={[ { required: true, message: "Please input your email!" } ]}
 				>
 					<Input />
 				</Form.Item>
@@ -79,37 +96,67 @@ AuthForm.propTypes = {
 	type: PropTypes.oneOf([ "sign-in", "sign-up" ])
 }
 
-function signIn (username, password) {
-	return fetch(`${process.env.REACT_APP_API_URL}/auth/sign-in`, {
-		method: "POST",
-		headers: {
-			Authorization: `Basic ${btoa(`${username}:${password}`)}`
-		}
-	})
-		.then((res) => res.json())
+function signIn (email, password, handler) {
+	return handleResponse(
+		fetch(`${process.env.REACT_APP_API_URL}/api/sign-in`, {
+			method: "POST",
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				email,
+				password
+			})
+		}),
+		handler
+	)
 }
 
-function signUp (username, password) {
-	return fetch(`${process.env.REACT_APP_API_URL}/auth/sign-up`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify({
-			username,
-			password
+function signUp (name, email, password) {
+	return handleResponse(
+		fetch(`${process.env.REACT_APP_API_URL}/api/sign-up`, {
+			method: "POST",
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				email,
+				name,
+				password
+			})
 		})
-	})
+	)
+}
+
+function handleResponse (promise, handler) {
+	return promise
 		.then((res) => {
-			if (res.status >= 400) return res.json()
+			if (res.status >= 400) {
+				return res.json()
+			}
+			if (handler) {
+				res.json().then(handler)
+			}
 			return ""
+		})
+		.then(data => {
+			if (data) {
+				return {
+					error: true,
+					data
+				}
+			}
+			return data
 		})
 		.then((data) => {
 			if (data && data.error) {
 				showErrors(data)
+				return false
 			} else {
 				showSuccess()
+				return true
 			}
-			return data
 		})
 }

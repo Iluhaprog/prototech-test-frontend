@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Row, Layout, Menu, Typography, Col, Button } from "antd"
+import { Row, Layout, Typography, Col, Button } from "antd"
 import { Link } from "react-router-dom"
 import { useStore } from "effector-react"
 import { $authStore, setToken } from "../../shared/model/user"
@@ -10,29 +10,12 @@ export function Header () {
 	return (
 		<Layout.Header>
 			<Row>
-				<Col span={3}>
+				<Col span={6}>
 					<Typography.Title level={2} style={{ color: "#fff", paddingTop: "8px" }}>
-            Blog
+            Currencies
 					</Typography.Title>
 				</Col>
-				<Col span={15}>
-					<Menu theme="dark" mode="horizontal">
-						<Menu.Item key="item-1">
-							<Link to="/wall" key="redact-post-link">
-								Wall
-							</Link>
-						</Menu.Item>
-						{isAuthorized
-							? (<>
-								<Menu.Item key="item-2">
-									<Link to="/redact" key="redact-post-link">
-                    New post
-									</Link>
-								</Menu.Item>
-							</>)
-							: (<></>)}
-					</Menu>
-				</Col>
+				<Col span={12}></Col>
 				{
 					!isAuthorized
 						? (
