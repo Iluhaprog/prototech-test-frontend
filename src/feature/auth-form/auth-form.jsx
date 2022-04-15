@@ -43,7 +43,7 @@ export function AuthForm ({
 	return isAuthorized
 		? (
 			<Navigate
-				to="/wall"
+				to="/"
 			/>
 		)
 		: (
